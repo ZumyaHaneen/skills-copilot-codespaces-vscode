@@ -1,34 +1,46 @@
-// create web server
-// create a web server that listens to port 3000
-// when a request is made to the server, the server will return a list of comments in JSON format
-// the server will also handle POST requests to add new comments
+// create a web server
+// 1. create a server
+// 2. create a port
+// 3. create a response
+// 4. listen to the server
 
-var http = require('http');
-var url = require('url');
-var items = [];
+const http = require('http');
+const fs = require('fs');
+const port = 3000;
 
-var server = http.createServer(function(req, res) {
-    switch (req.method) {
-        case 'POST':
-            var item = '';
-            req.setEncoding('utf8');
-            req.on('data', function(chunk) {
-                item += chunk;
-            });
-            req.on('end', function() {
-                items.push(item);
-                res.end('OK\n');
-            });
-            break;
-        case 'GET':
-            var body = items.map(function(item, i) {
-                return i + ') ' + item;
-            }).join('\n');
-            res.setHeader('Content-Length', Buffer.byteLength(body));
-            res.setHeader('Content-Type', 'text/plain; charset="utf-8"');
-            res.end(body);
-            break;
+const server = http.createServer((req, res) => {
+    // console.log(req.url);
+    if (req.url === '/') {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write('<h1>Welcome to the homepage</h1>');
+        res.end();
+    } else if (req.url === '/about') {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write('<h1>Welcome to the about page</h1>');
+        res.end();
+    } else if (req.url === '/contact') {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write('<h1>Welcome to the contact page</h1>');
+        res.end();
+    } else if (req.url === '/comments') {
+        fs.readFile('comments.html', (err, data) => {
+            if (err) {
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.write('Error: File Not Found');
+                res.end();
+            } else {
+                res.writeHead(200, { 'Content-Type': 'text/html' });
+                res.write(data);
+                res.end();
+            }
+        });
+    } else {
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        res.write('Error: Page Not Found');
+        res.end();
     }
 });
 
-server.listen(3000);
+server.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
